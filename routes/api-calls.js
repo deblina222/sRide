@@ -10,13 +10,13 @@ const {
 } = require('./request-calls');
 
 function insertResponse(dbName, collectionName, data){
-    client.initialize(dbName, collectionName, function (dbCollection) { // successCallback
+    client.initialize(dbName, collectionName, (dbCollection) => { // successCallback
         // get all items
         dbCollection.insertOne(data, function (err, result) {
             if (err) throw err;
             console.log("records inserted successfully");
         })
-    }, function (err) { // failureCallback
+    }, (err) => { // failureCallback
         throw (err);
     });
 }

@@ -6,7 +6,7 @@ function initialize(
     successCallback,
     failureCallback
 ) {
-    MongoClient.connect(uri, (err, dbInstance) => {
+    MongoClient.connect(uri, {useUnifiedTopology: true}, (err, dbInstance) => {
         if (err) {
             console.log(`[MongoDB connection] ERROR: ${err}`);
             failureCallback(err); // this should be "caught" by the calling function
