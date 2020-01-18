@@ -1,8 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const {
-    client
-} = require('../config/connection');
+const client = require('../config/connection');
 
 const {
     isPrime
@@ -11,28 +9,39 @@ const {
     requestExternalApi
 } = require('./request-calls');
 
+function insertResponse(dbName, collectionName, data){
+    client.initialize(dbName, collectionName, function (dbCollection) { // successCallback
+        // get all items
+        dbCollection.insertOne(data, function (err, result) {
+            if (err) throw err;
+            console.log("records inserted successfully");
+        })
+    }, function (err) { // failureCallback
+        throw (err);
+    });
+}
+
 /* GET home page. */
 router.get('/weather', function (req, res, next) {
-    let currentDate = new Date('02-02-2020').getDate() || 0;
+    let currentDate = new Date().getDate() || 0;
+    const dbName = "sRide";
+    const collectionName = "weatherReports";
     console.log('currentDate >>> ', currentDate);
 
     if (isPrime(currentDate)) {
         requestExternalApi()
             .then(data => {
-                // console.log(client.adminCommand( { listDatabases: 1, nameOnly: true} ))
-                const collection = client.db("sRide").collection("weatherReports");
-                // // perform actions on the collection object 
-                // collection.insertOne(data.weather, (error, result) => {
-                //     if(error) {
-                //         return res.status(500).send(error);
-                //     }
-                //     res.send(data);
-                // });
+                insertResponse(dbName, collectionName, data);
                 res.send(data);
             })
-            .catch(() => res.send('Error in getting response'));
+            .catch((err) => {
+                insertResponse(dbName, collectionName, err);
+                res.send('Error in getting response')
+            });
     } else {
-        res.send('Date is not prime so no data');
+        let obj = {result : 'Date is not prime so no data'}
+        insertResponse(dbName, collectionName,obj);
+        res.send(obj.result);
     }
 });
 
